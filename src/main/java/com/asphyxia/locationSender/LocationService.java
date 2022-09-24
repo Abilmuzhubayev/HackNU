@@ -12,6 +12,8 @@ import com.pubnub.api.endpoints.pubsub.Publish;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
 import lombok.Data;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
@@ -21,6 +23,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Data
 @Service
@@ -30,7 +33,7 @@ public class LocationService {
     private String publishKey = "pub-c-534260b7-21ea-4b33-9def-7599f31ebe1f";
     private String subscribeKey = "sub-c-bd5e7bdb-4007-4ebd-b9c8-1f344613d945";
 
-    private String excelPath = "C:\\Users\\user\\IdeaProjects\\locationSender\\src\\main\\resources\\routes\\hacknu-dev-data.xlsx";
+    private String excelPath = "C:\\Users\\user\\IdeaProjects\\locationSender\\src\\main\\resources\\routes\\dev-data.xlsx";
     private PubNub pubNub;
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -57,39 +60,46 @@ public class LocationService {
     }
 
 
-    private void getRoute(int id) throws IOException {
+    private List<LocationData> getRoute(int id) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook(excelPath);
         XSSFSheet sheet = workbook.getSheet(routes.get(id));
-        System.out.println(routes.get(id));
-        System.out.println(sheet.getLastRowNum());
+        int rowNum = sheet.getPhysicalNumberOfRows();
+        List<LocationData> locationDataList = new ArrayList<>();
+        for (int i = 1; i < rowNum; i++) {
+            Row row = sheet.getRow(i);
+            List<Object> params = new ArrayList<>();
+            for (int j = 0; j < row.getLastCellNum(); j++) {
+                if (row.getCell(j).getCellType() == CellType.STRING) {
+                    params.add(row.getCell(j).getStringCellValue());
+                } else if (row.getCell(j).getCellType() == CellType.NUMERIC) {
+                    params.add(row.getCell(j).getNumericCellValue());
+                }
+            }
+            LocationData locationData = LocationData.getLocationData(params);
+            locationDataList.add(locationData);
+        }
+        return locationDataList;
     }
-    public void postMessage(int id) throws IOException {
-        getRoute(id);
+    public void postMessage(int id) throws IOException, InterruptedException {
+        List<LocationData> locationDataList = getRoute(id);
 
-        LocationData locationdata = new LocationData();
-        locationdata.setActivity("Cycling");
-        locationdata.setAltitude(17.04397242);
-        locationdata.setLatitude(51.53371153);
-        locationdata.setIdentifier("Alice");
-        locationdata.setLongitude(-0.126159919);
-        locationdata.setFloorLabel(4);
-        locationdata.setTimestamp(267813L);
-        locationdata.setHorAccuracy(18.2302031);
-        locationdata.setVerAccuracy(4.39101);
+        for (int i = 0; i < locationDataList.size(); i++) {
+            if (i > 0) {
+                long difference = locationDataList.get(i).getTimestamp() - locationDataList.get(i - 1).getTimestamp();
+                Thread.sleep(difference)    ;
+            }
+            String json = objectMapper.writeValueAsString(locationDataList.get(i));
+            JSONObject jsonObject = new JSONObject(json);
 
-        String json = objectMapper.writeValueAsString(locationdata);
-
-        JSONObject jsonObject = new JSONObject(json);
-
-        pubNub.publish()
-                .channel("location_channel")
-                .message(jsonObject)
-                .async((result, status) -> {
-                    if (status.isError()) {
-                        System.out.println("status code: " + status.getStatusCode());
-                    }
-                    else System.out.println("timetoken: " + result.getTimetoken());
-                });
-
+            pubNub.publish()
+                    .channel("location_channel")
+                    .message(jsonObject)
+                    .async((result, status) -> {
+                        if (status.isError()) {
+                            System.out.println("status code: " + status.getStatusCode());
+                        }
+                        else System.out.println("timetoken: " + result.getTimetoken());
+                    });
+        }
     }
 }

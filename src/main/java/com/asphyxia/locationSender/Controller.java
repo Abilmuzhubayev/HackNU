@@ -16,7 +16,7 @@ public class Controller {
     LocationService locationService;
 
     @RequestMapping("/{id}")
-    public void postMessage(@PathVariable("id") int id) throws IOException {
+    public void postMessage(@PathVariable("id") int id) throws IOException, InterruptedException {
         locationService.postMessage(id);
     }
 }
