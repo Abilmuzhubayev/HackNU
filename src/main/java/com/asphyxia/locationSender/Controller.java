@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/map")
 public class Controller {
@@ -14,7 +16,7 @@ public class Controller {
     LocationService locationService;
 
     @RequestMapping("/{id}")
-    public void postMessage(@PathVariable("id") int id) throws JsonProcessingException {
+    public void postMessage(@PathVariable("id") int id) throws IOException {
         locationService.postMessage(id);
     }
 }
