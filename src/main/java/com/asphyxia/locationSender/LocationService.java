@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -87,9 +88,11 @@ public class LocationService {
                 }
             }
             LocationData locationData = LocationData.getLocationData(params);
-            System.out.println(locationData);
             locationDataList.add(locationData);
         }
+
+        locationDataList.sort(LocationData.Comparators.TIME);
+
         return locationDataList;
     }
     public void postMessage(int id) throws IOException, InterruptedException {
@@ -98,20 +101,21 @@ public class LocationService {
         for (int i = 0; i < locationDataList.size(); i++) {
             if (i > 0) {
                 long difference = locationDataList.get(i).getTimestamp() - locationDataList.get(i - 1).getTimestamp();
-                Thread.sleep(difference)    ;
+                Thread.sleep(difference);
             }
+            System.out.println(locationDataList.get(i));
             String json = objectMapper.writeValueAsString(locationDataList.get(i));
             JSONObject jsonObject = new JSONObject(json);
 
-            pubNub.publish()
-                    .channel("location_channel")
-                    .message(jsonObject)
-                    .async((result, status) -> {
-                        if (status.isError()) {
-                            System.out.println("status code: " + status.getStatusCode());
-                        }
-                        else System.out.println("timetoken: " + result.getTimetoken());
-                    });
+//            pubNub.publish()
+//                    .channel("location_channel")
+//                    .message(jsonObject)
+//                    .async((result, status) -> {
+//                        if (status.isError()) {
+//                            System.out.println("status code: " + status.getStatusCode());
+//                        }
+//                        else System.out.println("timetoken: " + result.getTimetoken());
+//                    });
         }
     }
 }
