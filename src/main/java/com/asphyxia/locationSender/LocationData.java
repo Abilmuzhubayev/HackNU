@@ -1,8 +1,10 @@
 package com.asphyxia.locationSender;
 
+import kotlin.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class LocationData implements Serializable {
     private double latitude;
     private double longitude;
@@ -29,7 +32,12 @@ public class LocationData implements Serializable {
         locationData.setAltitude((Double) params.get(2));
         locationData.setIdentifier((String) params.get(3));
         locationData.setTimestamp(((Double) params.get(4)).longValue());
-        locationData.setFloorLabel(((Double) params.get(5)).intValue());
+        Pair<Object, Boolean> floorLabel = (Pair<Object, Boolean>) params.get(5);
+        if (floorLabel.getSecond().equals(Boolean.FALSE)) {
+            locationData.setFloorLabel(null);
+        } else {
+            locationData.setFloorLabel(((Double) ((Pair<Object, Boolean>) params.get(5)).getFirst()).intValue());
+        }
         locationData.setHorAccuracy((Double) params.get(6));
         locationData.setVerAccuracy((Double) params.get(7));
         locationData.setActivity((String) params.get(9));

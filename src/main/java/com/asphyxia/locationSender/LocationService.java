@@ -11,6 +11,7 @@ import com.pubnub.api.callbacks.PNCallback;
 import com.pubnub.api.endpoints.pubsub.Publish;
 import com.pubnub.api.models.consumer.PNPublishResult;
 import com.pubnub.api.models.consumer.PNStatus;
+import kotlin.Pair;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -70,12 +71,23 @@ public class LocationService {
             List<Object> params = new ArrayList<>();
             for (int j = 0; j < row.getLastCellNum(); j++) {
                 if (row.getCell(j).getCellType() == CellType.STRING) {
-                    params.add(row.getCell(j).getStringCellValue());
+                    String curValue = row.getCell(j).getStringCellValue();
+                    if (j == 5) {
+                        params.add(new Pair<Object, Boolean>(curValue, Boolean.FALSE));
+                    } else {
+                        params.add(row.getCell(j).getStringCellValue());
+                    }
                 } else if (row.getCell(j).getCellType() == CellType.NUMERIC) {
-                    params.add(row.getCell(j).getNumericCellValue());
+                    Double curValue = row.getCell(j).getNumericCellValue();
+                    if (j == 5) {
+                        params.add(new Pair<Object, Boolean>(curValue, Boolean.TRUE));
+                    } else {
+                        params.add(row.getCell(j).getNumericCellValue());
+                    }
                 }
             }
             LocationData locationData = LocationData.getLocationData(params);
+            System.out.println(locationData);
             locationDataList.add(locationData);
         }
         return locationDataList;
