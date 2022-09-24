@@ -107,15 +107,15 @@ public class LocationService {
             String json = objectMapper.writeValueAsString(locationDataList.get(i));
             JSONObject jsonObject = new JSONObject(json);
 
-//            pubNub.publish()
-//                    .channel("location_channel")
-//                    .message(jsonObject)
-//                    .async((result, status) -> {
-//                        if (status.isError()) {
-//                            System.out.println("status code: " + status.getStatusCode());
-//                        }
-//                        else System.out.println("timetoken: " + result.getTimetoken());
-//                    });
+            pubNub.publish()
+                    .channel("location_channel")
+                    .message(jsonObject)
+                    .async((result, status) -> {
+                        if (status.isError()) {
+                            System.out.println("status code: " + status.getStatusCode());
+                        }
+                        else System.out.println("timetoken: " + result.getTimetoken());
+                    });
         }
     }
 }
