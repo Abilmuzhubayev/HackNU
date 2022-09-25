@@ -49,16 +49,11 @@ public class LocationService {
         pubNub = new PubNub(configuration);
 
         //initialize hashmap
-        routes.put(1, "dev1");
-        routes.put(2, "dev2");
-        routes.put(3, "dev3");
-        routes.put(4, "dev4");
-        routes.put(5, "dev5");
-        routes.put(6, "dev6");
-        routes.put(7, "dev7");
-        routes.put(8, "dev8");
-        routes.put(9, "dev9");
-        routes.put(10, "dev10");
+        routes.put(1, "prod1");
+        routes.put(2, "prod2");
+        routes.put(3, "prod3");
+        routes.put(4, "prod4");
+        routes.put(5, "prod5");
     }
 
 
